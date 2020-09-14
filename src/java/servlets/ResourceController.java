@@ -6,6 +6,7 @@
 package servlets;
 
 import entity.Resource;
+import entity.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ejb.EJB;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import session.ResourceFacade;
+import session.UsersFacade;
 
 /**
  *
@@ -26,13 +28,16 @@ import session.ResourceFacade;
     "/listResources",
     "/deleteResource",
     "/showEditResource",
-    "/showUpdateResource"
+    "/showUpdateResource",
+     "/showFormAddUsers",
+     "/createUsers"
     
 
 })
 public class ResourceController extends HttpServlet {
     @EJB
     private ResourceFacade resourceFacade;
+    private UsersFacade usersFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -74,6 +79,21 @@ public class ResourceController extends HttpServlet {
                 break;
             case "/showUpdateResource":
                 
+                break;
+            case "/showFormAddUsers":
+                request.getRequestDispatcher("/showFormAddUsers.jsp").forward(request, response);
+                break;
+            case "/createUsers":
+                String userlogin = request.getParameter("userlogin");
+                String userpassword = request.getParameter("userpassword");
+                String phone = request.getParameter("phone");
+                String mail = request.getParameter("mail");
+                
+                
+                Users users = new Users(userlogin, userpassword, phone, mail);
+                usersFacade.create(users);
+                request.setAttribute("info", "Пользователь : "+users.getUserlogin());
+                request.getRequestDispatcher("/index.jsp").forward(request, response);
                 break;
             
            
