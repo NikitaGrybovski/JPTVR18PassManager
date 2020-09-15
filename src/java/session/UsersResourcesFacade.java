@@ -5,7 +5,7 @@
  */
 package session;
 
-import entity.Users;
+import entity.UsersResources;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,7 +15,7 @@ import javax.persistence.PersistenceContext;
  * @author pupil
  */
 @Stateless
-public class UsersFacade extends AbstractFacade<Users> {
+public class UsersResourcesFacade extends AbstractFacade<UsersResources> {
 
     @PersistenceContext(unitName = "JPTVR18PassManagerPU")
     private EntityManager em;
@@ -25,18 +25,8 @@ public class UsersFacade extends AbstractFacade<Users> {
         return em;
     }
 
-    public UsersFacade() {
-        super(Users.class);
+    public UsersResourcesFacade() {
+        super(UsersResources.class);
     }
     
-    public Users fingByLogin(String login){
-        try {
-            return (Users) em.createQuery("SELECT u FROM Users u WHERE u.userlogin = :login")
-                .setParameter("login", login)
-                .getSingleResult();
-        } catch (Exception e) {
-            return null;
-        }
-        
-    }
 }

@@ -20,21 +20,18 @@ import javax.persistence.Id;
 public class Users implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String userlogin;
     private String userpassword;
-    private String phone;
-    private String mail;
+    
 
     public Users() {
     }
 
-    public Users(String userlogin, String userpassword, String phone, String mail) {
+    public Users(String userlogin, String userpassword) {
         this.userlogin = userlogin;
         this.userpassword = userpassword;
-        this.phone = phone;
-        this.mail = mail;
     }
 
     public Long getId() {
@@ -61,35 +58,20 @@ public class Users implements Serializable {
         this.userpassword = userpassword;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
-    }
-
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 13 * hash + Objects.hashCode(this.id);
-        hash = 13 * hash + Objects.hashCode(this.userlogin);
-        hash = 13 * hash + Objects.hashCode(this.userpassword);
-        hash = 13 * hash + Objects.hashCode(this.phone);
-        hash = 13 * hash + Objects.hashCode(this.mail);
+        int hash = 5;
+        hash = 59 * hash + Objects.hashCode(this.id);
+        hash = 59 * hash + Objects.hashCode(this.userlogin);
+        hash = 59 * hash + Objects.hashCode(this.userpassword);
         return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
@@ -97,19 +79,13 @@ public class Users implements Serializable {
             return false;
         }
         final Users other = (Users) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
         if (!Objects.equals(this.userlogin, other.userlogin)) {
             return false;
         }
         if (!Objects.equals(this.userpassword, other.userpassword)) {
             return false;
         }
-        if (!Objects.equals(this.phone, other.phone)) {
-            return false;
-        }
-        if (!Objects.equals(this.mail, other.mail)) {
+        if (!Objects.equals(this.id, other.id)) {
             return false;
         }
         return true;
@@ -117,8 +93,10 @@ public class Users implements Serializable {
 
     @Override
     public String toString() {
-        return "Users{" + "id=" + id + ", userlogin=" + userlogin + ", userpassword=" + userpassword + ", phone=" + phone + ", mail=" + mail + '}';
+        return "Users{" + "id=" + id + ", userlogin=" + userlogin + ", userpassword=" + userpassword + '}';
     }
+
+    
     
     
     

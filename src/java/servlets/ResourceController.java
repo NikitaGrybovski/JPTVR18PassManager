@@ -7,16 +7,22 @@ package servlets;
 
 import entity.Resource;
 import entity.Users;
+import entity.UsersResources;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import session.ResourceFacade;
 import session.UsersFacade;
+import session.UsersResourcesFacade;
 
 /**
  *
@@ -30,14 +36,20 @@ import session.UsersFacade;
     "/showEditResource",
     "/showUpdateResource",
      "/showFormAddUsers",
-     "/createUsers"
+     "/createUsers",
+     "/showFormLogin",
+     "/login",
+     "/logout",
     
 
 })
 public class ResourceController extends HttpServlet {
     @EJB
     private ResourceFacade resourceFacade;
+    @EJB
     private UsersFacade usersFacade;
+    @EJB
+    private UsersResourcesFacade usersResourcesFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -50,7 +62,22 @@ public class ResourceController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        request.setCharacterEncoding("UTF-8");
         String path = request.getServletPath();
+        HttpSession session = request.getSession(false);
+        
+        if(session == null){
+            request.setAttribute("info", "У вас нету прав, авторизуйтесь");
+            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+        }
+        Users users = null;
+        users = (Users) session.getAttribute("users");
+        if(users == null){ 
+            request.setAttribute("info", "Нет такого пользователя");
+            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+        }
+        
+       
         switch (path) {
             case "/showFormAddResource":
                 request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
@@ -64,11 +91,18 @@ public class ResourceController extends HttpServlet {
                 Resource resource = new Resource(name, url, login, password);
                 
                 resourceFacade.create(resource);
+                
+                Calendar c = new GregorianCalendar();
+                UsersResources usersResources = new UsersResources(users, resource, c.getTime());
+                usersResourcesFacade.create(usersResources);
+                
                 request.setAttribute("info", "Ресурс создан : "+resource.getName()+" / "+resource.getUrl());
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
                 break;
             case "/listResources":
-                resourceFacade.findAll();
+                request.setAttribute("resources", resourceFacade.findAll());
+                request.getRequestDispatcher("/listResources.jsp").forward(request, response);
+                
                 
                 break;
             case "/deleteResource":
@@ -84,15 +118,48 @@ public class ResourceController extends HttpServlet {
                 request.getRequestDispatcher("/showFormAddUsers.jsp").forward(request, response);
                 break;
             case "/createUsers":
+                
                 String userlogin = request.getParameter("userlogin");
                 String userpassword = request.getParameter("userpassword");
                 String phone = request.getParameter("phone");
                 String mail = request.getParameter("mail");
                 
                 
-                Users users = new Users(userlogin, userpassword, phone, mail);
+                users = new Users(userlogin, userpassword);
+                
                 usersFacade.create(users);
-                request.setAttribute("info", "Пользователь : "+users.getUserlogin());
+                request.setAttribute("info", "Пользователь : "+users.getUserlogin()+"создан");
+                request.getRequestDispatcher("/index.jsp").forward(request, response);
+                break;
+            case "/showFormLogin":
+                request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+                break;
+            case "/login":
+                login = request.getParameter("login");
+                password = request.getParameter("password");
+                users = usersFacade.fingByLogin(login);
+                
+                if(users == null){
+                    
+                    
+                    request.setAttribute("info", "Нет такого пользователя");
+                    request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+                }
+                if(!password.equals(users.getUserpassword())){
+                    request.setAttribute("info", "Нет такого пользователя");
+                    request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+                }
+                session = request.getSession(true);
+                session.setAttribute("users", users);
+                request.setAttribute("info", "Привет, "+users.getUserlogin());
+                request.getRequestDispatcher("/index.jsp").forward(request, response);
+                break;
+            case "/logout":
+                session = request.getSession(false);
+                if(session != null){
+                    session.invalidate();
+                }
+                request.setAttribute("info", "Вы вышли из аккаунта");
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
                 break;
             

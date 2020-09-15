@@ -17,10 +17,6 @@
             <input type="text" name="userlogin"><br>
             <label>Пароль: </label>
             <input type="text" name="userpassword"><br>
-            <label>Телефон </label>
-            <input type="text" name="phone"><br>
-            <label>Почта </label>
-            <input type="text" name="mail"><br>
             <input type="submit" value="создать">
         </form>
     </body>
