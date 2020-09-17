@@ -14,12 +14,15 @@
     </head>
     <body>
         <form action="login" method="post">
-            <label>Логин: </label>
-            <input type="text" name="login"><br>
-            <label>Пароль: </label>
-            <input type="text" name="password"><br>
-            <input type="submit" value="войти"><br>
-            <br>Нет логина? <a href="showFormAddUsers">Зарегистрироваться</a>
+            <div class="form-group" style="width:15%;padding-left:2%;">
+                <p>${info}</p>
+                <label>Логин: </label>
+                <input type="text" name="login" class="form-control"><br>
+                <label>Пароль: </label>
+                <input type="text" name="password" class="form-control"><br>
+                <input type="submit" value="войти" class="btn btn-primary"><br>
+                <br>Нет логина? <a href="showFormAddUsers">Зарегистрироваться</a>
+            </div>
         </form>
     </body>
 </html>

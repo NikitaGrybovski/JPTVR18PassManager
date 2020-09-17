@@ -7,21 +7,26 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
+
+    <h1>Список ресурсов: </h1>
         
-        
-        <ul>
-            <c:forEach var="resource" items="${resources}">
-                <li><c:out value="${resource}" /></li>
+    <table class="table">
+            <c:forEach var="resource" items="${listResources}">
+                <tr>
+                    <td>
+                        <li>Имя: ${resource.name}</li>
+                        <li>URL: ${resource.url}</li>
+                        <li>Login: ${resource.login}</li>
+                        <li>Password: ${resource.password}</li>
+                    </td>
+                    <td>
+                        <a href="deleteResource?id=${resource.id}">Удалить</a>
+                    </td>
+                </tr>
             </c:forEach>
                 <a href="index.jsp">Назад</a>
-        </ul>
+    </table>
         
         
-    </body>
-</html>
+        
+

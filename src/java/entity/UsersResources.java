@@ -8,6 +8,7 @@ package entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,9 +28,9 @@ public class UsersResources implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Users users;
-    @OneToOne
+    @OneToOne (cascade = CascadeType.ALL)
     private Resource resource;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date date;

@@ -66,15 +66,13 @@ public class ResourceController extends HttpServlet {
         String path = request.getServletPath();
         HttpSession session = request.getSession(false);
         
-        if(session == null){
-            request.setAttribute("info", "У вас нету прав, авторизуйтесь");
-            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-        }
+        
         Users users = null;
         users = (Users) session.getAttribute("users");
         if(users == null){ 
-            request.setAttribute("info", "Нет такого пользователя");
+            request.setAttribute("info", "Войдите в систему");
             request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+
         }
         
        
@@ -83,6 +81,7 @@ public class ResourceController extends HttpServlet {
                 request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
                 break;
             case "/createResource":
+                
                 String name = request.getParameter("name");
                 String url = request.getParameter("url");
                 String login = request.getParameter("login");
@@ -100,12 +99,33 @@ public class ResourceController extends HttpServlet {
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
                 break;
             case "/listResources":
-                request.setAttribute("resources", resourceFacade.findAll());
-                request.getRequestDispatcher("/listResources.jsp").forward(request, response);
-                
+                List<Resource> listResources = resourceFacade.findByUser(users);
+                request.setAttribute("listResources",listResources);
+                request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
                 
                 break;
             case "/deleteResource":
+                String id = request.getParameter("id");
+                if(id == null || "".equals(id)){
+                    request.setAttribute("info","Нет такого ресурса");
+                    request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
+                
+                    break;
+                
+                }
+                Resource deleteResource = resourceFacade.find(Long.parseLong(id));
+                listResources = resourceFacade.findByUser(users);
+                if(!listResources.contains(deleteResource)){
+                    request.setAttribute("info","Нет такого ресурса");
+                    request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
+                
+                    break;
+                }
+                usersResourcesFacade.removeByResource(deleteResource);
+                resourceFacade.remove(deleteResource);
+                request.setAttribute("info", "ресурс удален");
+                request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
+                
                 
                 break;
             case "/showEditResource":
