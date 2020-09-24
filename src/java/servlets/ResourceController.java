@@ -40,6 +40,7 @@ import session.UsersResourcesFacade;
      "/showFormLogin",
      "/login",
      "/logout",
+     
     
 
 })
@@ -69,20 +70,28 @@ public class ResourceController extends HttpServlet {
         
         Users users = null;
         users = (Users) session.getAttribute("users");
-        if(users == null){ 
-            request.setAttribute("info", "Войдите в систему");
-            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-
-        }
+        
         
        
         switch (path) {
             case "/showFormAddResource":
-                request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
-                break;
-            case "/createResource":
+                if(users == null){ 
+            request.setAttribute("info", "Войдите в систему");
+            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+
+            }else{
+                    request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
+                }
                 
-                String name = request.getParameter("name");
+                break;
+            
+            case "/createResource":
+                if(users == null){ 
+                request.setAttribute("info", "Войдите в систему");
+                request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+
+                }else{
+                    String name = request.getParameter("name");
                 String url = request.getParameter("url");
                 String login = request.getParameter("login");
                 String password = request.getParameter("password");
@@ -97,11 +106,20 @@ public class ResourceController extends HttpServlet {
                 
                 request.setAttribute("info", "Ресурс создан : "+resource.getName()+" / "+resource.getUrl());
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
+                }
+                
                 break;
             case "/listResources":
-                List<Resource> listResources = resourceFacade.findByUser(users);
+                if(users == null){ 
+            request.setAttribute("info", "Войдите в систему");
+            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
+
+            }else{
+                    List<Resource> listResources = resourceFacade.findByUser(users);
                 request.setAttribute("listResources",listResources);
                 request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
+                }
+                
                 
                 break;
             case "/deleteResource":
@@ -114,7 +132,7 @@ public class ResourceController extends HttpServlet {
                 
                 }
                 Resource deleteResource = resourceFacade.find(Long.parseLong(id));
-                listResources = resourceFacade.findByUser(users);
+                List<Resource> listResources = resourceFacade.findByUser(users);
                 if(!listResources.contains(deleteResource)){
                     request.setAttribute("info","Нет такого ресурса");
                     request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
@@ -155,16 +173,11 @@ public class ResourceController extends HttpServlet {
                 request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
                 break;
             case "/login":
-                login = request.getParameter("login");
-                password = request.getParameter("password");
+                String login = request.getParameter("login");
+                String password = request.getParameter("password");
                 users = usersFacade.fingByLogin(login);
                 
-                if(users == null){
-                    
-                    
-                    request.setAttribute("info", "Нет такого пользователя");
-                    request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-                }
+              
                 if(!password.equals(users.getUserpassword())){
                     request.setAttribute("info", "Нет такого пользователя");
                     request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);

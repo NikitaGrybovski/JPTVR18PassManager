@@ -28,9 +28,9 @@ public class UsersResources implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     private Users users;
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne 
     private Resource resource;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date date;

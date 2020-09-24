@@ -33,7 +33,8 @@ public class UsersResourcesFacade extends AbstractFacade<UsersResources> {
     public void removeByResource(Resource deleteResource) {
         try {
             em.createQuery("DELETE FROM UsersResources ur WHERE ur.resource = :resource")
-                    .setParameter("resource", deleteResource);
+                    .setParameter("resource", deleteResource)
+                    .executeUpdate();
             em.flush();
         } catch (Exception e) {
             
