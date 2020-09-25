@@ -6,20 +6,31 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Добавить пользователя</title>
-    </head>
-    <body>
-        <form action="createUsers" method="post" style="width:15%;padding-left:2%;">
-            <div class="form-group">
-            <label>Логин: </label>
-            <input type="text" name="userlogin" class="form-control"><br>
-            <label>Пароль: </label>
-            <input type="text" name="userpassword" class="form-control"><br>
-            <input type="submit" value="создать" class="btn btn-primary">
-            </div>
-        </form>
-    </body>
-</html>
+
+
+
+<div class="container">
+ <div class="row">
+<div class="col-md-3"></div>
+ <div class="col-md-offset-3 col-md-6">
+    <form class="form-horizontal" action="createUsers" method="post">
+        <span class="heading">Регистрация</span>
+        <p>${info}</p>
+        <div class="form-group">
+        <input type="text" class="form-control" id="inputLogin" name="userlogin" placeholder="Логин: ">
+        <i class="fa fa-user"></i>
+        </div>
+        <div class="form-group help">
+        <input type="password" class="form-control" id="inputPassword" name="userpassword" placeholder="Password">
+        <i class="fa fa-lock"></i>
+        <a href="#" class="fa fa-question-circle"></a>
+        </div>
+        <div class="form-group">
+        
+        <button type="submit" class="btn btn-default">Зарегистрироваться</button>
+        </div>
+    </form>
+ </div>
+
+ </div><!-- /.row -->
+</div><!-- /.container -->

@@ -8,25 +8,27 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 
-    <h1>Список ресурсов: </h1>
+    
         
-    <table class="table">
-            <c:forEach var="resource" items="${listResources}">
-                <tr>
-                    <td>
-                        <li>Имя: ${resource.name}</li>
-                        <li>URL: ${resource.url}</li>
-                        <li>Login: ${resource.login}</li>
-                        <li>Password: ${resource.password}</li>
-                    </td>
-                    <td>
-                        <a href="deleteResource?id=${resource.id}">Удалить</a>
-                    </td>
-                </tr>
-            </c:forEach>
-                <a href="index.jsp">Назад</a>
-    </table>
+
+
+<form action="listResources" method="POST">
+    <div class="jumbotron bg-white">
+        <h4 class="w-100 text-center">Список ресурсов</h4>
+        <div class="form-group w-50 mx-auto">
+            <select class="custom-select" name="idResource" id="idResource">
+                <option selected="">Откройте меню</option>
+                <c:forEach var="resource" items="${listResources}">
+                    <option value="${resource.id}">${resource.name}</option>
+                </c:forEach>
+            </select>
+        </div>
+        <div class="form-group w-50 mx-auto">
+            <button type="submit" class="btn btn-primary">Показать</button>
+        </div>
         
+    </div>
+</form>
         
         
 

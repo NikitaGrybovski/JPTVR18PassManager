@@ -34,7 +34,7 @@ import session.UsersResourcesFacade;
     "/listResources",
     "/deleteResource",
     "/showEditResource",
-    "/showUpdateResource",
+    "/updateResource",
      "/showFormAddUsers",
      "/createUsers",
      "/showFormLogin",
@@ -149,8 +149,20 @@ public class ResourceController extends HttpServlet {
             case "/showEditResource":
                 
                 break;
-            case "/showUpdateResource":
-                
+            case "/updateResource":
+                id = request.getParameter("idResource");
+                Resource resource = resourceFacade.find(Long.parseLong(id));
+                String name = request.getParameter("name");
+                String url = request.getParameter("url");
+                String login = request.getParameter("login");
+                String password = request.getParameter("password");
+                resource.setLogin(name);
+                resource.setLogin(url);
+                resource.setLogin(login);
+                resource.setLogin(password);
+                resourceFacade.edit(resource);
+                request.setAttribute("resource", resource);
+                request.getRequestDispatcher("/pages/listResources.jsp").forward(request,response);
                 break;
             case "/showFormAddUsers":
                 request.getRequestDispatcher("/showFormAddUsers.jsp").forward(request, response);
@@ -173,8 +185,8 @@ public class ResourceController extends HttpServlet {
                 request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
                 break;
             case "/login":
-                String login = request.getParameter("login");
-                String password = request.getParameter("password");
+                login = request.getParameter("login");
+                password = request.getParameter("password");
                 users = usersFacade.fingByLogin(login);
                 
               

@@ -6,23 +6,42 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+
+
+
+
 <div class="container">
-    <div class="row">
-        <div class="col-md-12">
-        <form action="createResource" method="post" class="form">
+ <div class="row">
+     <div class="col-md-3"></div>
+    <div class="col-md-offset-3 col-md-6">
+        <form class="form-horizontal" action="createResource" method="post">
+            <span class="heading">Добавить ресурс</span>
+            <div class="form-group">
+            <input type="text" class="form-control" id="inputName" name="name" placeholder="Имя ресурса:" >
+            <i class="fab fa-adn"></i>
             
-            <div class="form__group">
-            <label>Имя ресурса: </label>
-            <input type="text" name="name" class="form__input"><br>
-            <label>Адрес ресурса: </label>
-            <input type="text" name="url" class="form__input"><br>
-            <label>Логин ресурса: </label>
-            <input type="text" name="login" class="form__input"><br>
-            <label>Пароль ресурса: </label>
-            <input type="text" name="password" class="form__input"><br>
-            <input type="submit" value="создать" class="btn">
+            </div>
+            <div class="form-group help">
+            <input type="text" class="form-control" id="inputUrl" name="url" placeholder="Адрес ресурса:">
+            <i class="fa fa-id-badge"></i>
+            
+            </div>
+            <div class="form-group help">
+            <input type="text" class="form-control" id="inputLogin" name="login" placeholder="Логин ресурса:">
+            <i class="fa fa-user"></i>
+            
+            </div>
+            <div class="form-group help">
+            <input type="text" class="form-control" id="inputPassword" name="password" placeholder="Пароль ресурса:">
+            <i class="fa fa-lock"></i>
+            
+            </div>
+            <div class="form-group">
+          
+            <button type="submit" class="btn btn-default">Создать</button>
             </div>
         </form>
-        </div>
     </div>
-</div>
+
+ </div><!-- /.row -->
+</div><!-- /.container -->
