@@ -12,7 +12,7 @@
         
 
 
-<form action="listResources" method="POST">
+<form action="showResource" method="POST" id="showResource">
     <div class="jumbotron bg-white">
         <h4 class="w-100 text-center">Список ресурсов</h4>
         <div class="form-group w-50 mx-auto">

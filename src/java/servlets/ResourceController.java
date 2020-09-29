@@ -5,8 +5,11 @@
  */
 package servlets;
 
+import util.UserManager;
 import util.MakeHash;
 import entity.Resource;
+import entity.Role;
+import entity.UserRoles;
 import entity.Users;
 import entity.UsersResources;
 import java.io.IOException;
@@ -22,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import session.ResourceFacade;
+import session.RoleFacade;
+import session.UserRolesFacade;
 import session.UsersFacade;
 import session.UsersResourcesFacade;
 
@@ -41,7 +46,7 @@ import session.UsersResourcesFacade;
      "/showFormLogin",
      "/login",
      "/logout",
-     
+     "/showResource",
     
 
 })
@@ -52,6 +57,10 @@ public class ResourceController extends HttpServlet {
     private UsersFacade usersFacade;
     @EJB
     private UsersResourcesFacade usersResourcesFacade;
+    @EJB 
+    private RoleFacade roleFacade;
+    @EJB
+    private UserRolesFacade userRolesFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -71,27 +80,31 @@ public class ResourceController extends HttpServlet {
         
         Users users = null;
         users = (Users) session.getAttribute("users");
-        
+        UserManager userManager = new UserManager();
+        if(userManager.isRole(users,"USER")){
+            request.setAttribute("info", "У вас нет права");
+            request.getRequestDispatcher("/showFormLogin").forward(request, response);
+        }
         
        
         switch (path) {
             case "/showFormAddResource":
-                if(users == null){ 
+                
             request.setAttribute("info", "Войдите в систему");
             request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
 
-            }else{
+            
                     request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
-                }
+                
                 
                 break;
             
             case "/createResource":
-                if(users == null){ 
+                
                 request.setAttribute("info", "Войдите в систему");
                 request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
 
-                }else{
+                
                     String name = request.getParameter("name");
                 String url = request.getParameter("url");
                 String login = request.getParameter("login");
@@ -107,24 +120,31 @@ public class ResourceController extends HttpServlet {
                 
                 request.setAttribute("info", "Ресурс создан : "+resource.getName()+" / "+resource.getUrl());
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
-                }
+                
                 
                 break;
             case "/listResources":
-                if(users == null){ 
+                
             request.setAttribute("info", "Войдите в систему");
             request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
 
-            }else{
+           
                     List<Resource> listResources = resourceFacade.findByUser(users);
                 request.setAttribute("listResources",listResources);
                 request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
-                }
+                
                 
                 
                 break;
+            case "/showResource":
+                String id = request.getParameter("idRecource");
+                resource = resourceFacade.find(Long.parseLong(id));
+                request.setAttribute("resource", resource);
+                request.getRequestDispatcher("/showResource.jsp")
+                        .forward(request, response);
+                break;
             case "/deleteResource":
-                String id = request.getParameter("id");
+                id = request.getParameter("id");
                 if(id == null || "".equals(id)){
                     request.setAttribute("info","Нет такого ресурса");
                     request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
@@ -133,7 +153,7 @@ public class ResourceController extends HttpServlet {
                 
                 }
                 Resource deleteResource = resourceFacade.find(Long.parseLong(id));
-                List<Resource> listResources = resourceFacade.findByUser(users);
+                listResources = resourceFacade.findByUser(users);
                 if(!listResources.contains(deleteResource)){
                     request.setAttribute("info","Нет такого ресурса");
                     request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
@@ -152,11 +172,11 @@ public class ResourceController extends HttpServlet {
                 break;
             case "/updateResource":
                 id = request.getParameter("idResource");
-                Resource resource = resourceFacade.find(Long.parseLong(id));
-                String name = request.getParameter("name");
-                String url = request.getParameter("url");
-                String login = request.getParameter("login");
-                String password = request.getParameter("password");
+                resource = resourceFacade.find(Long.parseLong(id));
+                name = request.getParameter("name");
+                url = request.getParameter("url");
+                login = request.getParameter("login");
+                password = request.getParameter("password");
                 resource.setLogin(name);
                 resource.setLogin(url);
                 resource.setLogin(login);
@@ -182,6 +202,9 @@ public class ResourceController extends HttpServlet {
                 users = new Users(userlogin, encodingPassword,salts);
                 
                 usersFacade.create(users);
+                Role role = roleFacade.getRole("USER");
+                UserRoles userRoles = new UserRoles(users,role);
+                userRolesFacade.create(userRoles);
                 request.setAttribute("info", "Пользователь : "+users.getUserlogin()+"создан");
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
                 break;
