@@ -5,6 +5,7 @@
  */
 package servlets;
 
+import util.MakeHash;
 import entity.Resource;
 import entity.Users;
 import entity.UsersResources;
@@ -147,7 +148,7 @@ public class ResourceController extends HttpServlet {
                 
                 break;
             case "/showEditResource":
-                
+                request.getRequestDispatcher("/showFormEditResource.jsp").forward(request, response);
                 break;
             case "/updateResource":
                 id = request.getParameter("idResource");
@@ -171,11 +172,14 @@ public class ResourceController extends HttpServlet {
                 
                 String userlogin = request.getParameter("userlogin");
                 String userpassword = request.getParameter("userpassword");
+                MakeHash makeHash = new MakeHash();
+                String salts = makeHash.CreateSalts();
+                String encodingPassword = makeHash.createHash(userpassword, salts);
                 String phone = request.getParameter("phone");
                 String mail = request.getParameter("mail");
                 
                 
-                users = new Users(userlogin, userpassword);
+                users = new Users(userlogin, encodingPassword,salts);
                 
                 usersFacade.create(users);
                 request.setAttribute("info", "Пользователь : "+users.getUserlogin()+"создан");
@@ -189,8 +193,10 @@ public class ResourceController extends HttpServlet {
                 password = request.getParameter("password");
                 users = usersFacade.fingByLogin(login);
                 
-              
-                if(!password.equals(users.getUserpassword())){
+                MakeHash mh = new MakeHash();
+                String encriptPassword = mh.createHash(password,users.getSalts());
+                
+                if(!encriptPassword.equals(users.getUserpassword())){
                     request.setAttribute("info", "Нет такого пользователя");
                     request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
                 }

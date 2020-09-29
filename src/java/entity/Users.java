@@ -24,15 +24,27 @@ public class Users implements Serializable {
     private Long id;
     private String userlogin;
     private String userpassword;
+    private String salts;
     
 
     public Users() {
     }
 
-    public Users(String userlogin, String userpassword) {
+    public Users(String userlogin, String userpassword, String salts) {
         this.userlogin = userlogin;
         this.userpassword = userpassword;
+        this.salts = salts;
     }
+
+    public String getSalts() {
+        return salts;
+    }
+
+    public void setSalts(String salts) {
+        this.salts = salts;
+    }
+
+    
 
     public Long getId() {
         return id;
