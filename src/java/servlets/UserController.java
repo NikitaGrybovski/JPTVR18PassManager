@@ -17,13 +17,11 @@ import session.RoleFacade;
 import session.UserRolesFacade;
 import session.UsersFacade;
 
-/**
- *
- * @author Melnikov
- */
-@WebServlet(name = "UserController", urlPatterns = {
+
+@WebServlet(name = "UserController",loadOnStartup = 1 ,urlPatterns = {
     "/createUsers",
      "/showFormLogin",
+     "/showFormAddUsers",
      "/login",
      "/logout",
      
@@ -51,9 +49,11 @@ public class UserController extends HttpServlet {
         Role roleUser = new Role("ADMIN");
         roleFacade.create(roleUser);
         userRoles.setRole(roleUser);
+        userRolesFacade.create(userRoles);
         roleUser = new Role("USER");
         roleFacade.create(roleUser);
         userRoles.setRole(roleUser);
+        userRolesFacade.create(userRoles);
     }
     
     
@@ -76,13 +76,13 @@ public class UserController extends HttpServlet {
                         .forward(request, response);
                 break;
             case "/showFormLogin":
-                request.getRequestDispatcher("/systemPages/showFormLogin.jsp")
+                request.getRequestDispatcher("/showFormLogin.jsp")
                         .forward(request, response);
                 break;
             case "/login":
                 String login = request.getParameter("login");
                 String password = request.getParameter("password");
-                String users = usersFacade.fingByLogin(login);
+                Users users = usersFacade.fingByLogin(login);
                 
                 MakeHash mh = new MakeHash();
                 String encriptPassword = mh.createHash(password,users.getSalts());
@@ -91,7 +91,7 @@ public class UserController extends HttpServlet {
                     request.setAttribute("info", "Нет такого пользователя");
                     request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
                 }
-                session = request.getSession(true);
+                HttpSession session = request.getSession(true);
                 session.setAttribute("users", users);
                 request.setAttribute("info", "Привет, "+users.getUserlogin());
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
@@ -115,7 +115,7 @@ public class UserController extends HttpServlet {
                 String mail = request.getParameter("mail");
                 
                 
-                Users users = new Users(userlogin, encodingPassword,salts);
+                users = new Users(userlogin, encodingPassword,salts);
                 
                 usersFacade.create(users);
                 Role role = roleFacade.getRole("USER");

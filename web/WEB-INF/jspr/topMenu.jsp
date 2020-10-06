@@ -3,7 +3,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
     
-<c:if test="${loginOn ne null && loginOn eq true}">
+<c:if test="${topRoleCurrentUsers eq 'ADMIN' || topRoleCurrentUsers eq 'USER'}">
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="index.jsp">Меню</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,6 +18,9 @@
       <li class="nav-item"><a class="nav-link" href="listResources">Список ресурсов</a></li>
       <li class="nav-item"><a class="nav-link" href="showFormAddUsers">Добавить пользователя</a></li>
       <li class="nav-item"><a class="nav-link" href="logout">Выйти</a></li>
+      <c:if test="${topRoleCurrentUsers eq 'ADMIN'}">
+        <li class="nav-item"><a class="nav-link" href="showListUsers">Список пользователей</a></li>
+      </c:if>
     </ul>
     <form class="form-inline my-2 my-lg-0" action="search">
       <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
@@ -27,7 +30,7 @@
 </nav>   
 </c:if>
     
-<c:if test="${loginOn eq null or loginOn eq false}">
+<c:if test="${topRoleCurrentUsers eq null }">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="index.jsp">Меню</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

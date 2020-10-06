@@ -23,7 +23,7 @@
         <div class="form-group help">
         <input type="password" class="form-control" id="inputPassword" name="userpassword" placeholder="Password">
         <i class="fa fa-lock"></i>
-        <a href="#" class="fa fa-question-circle"></a>
+     
         </div>
         <div class="form-group">
         

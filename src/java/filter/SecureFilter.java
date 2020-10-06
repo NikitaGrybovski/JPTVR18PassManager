@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.ejb.EJB;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -20,6 +24,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import session.RoleFacade;
+import session.UserRolesFacade;
 
 /**
  *
@@ -27,7 +33,12 @@ import javax.servlet.http.HttpSession;
  */
 @WebFilter(filterName = "SecureFilter",dispatcherTypes = {DispatcherType.FORWARD}, urlPatterns = {"/*"})
 public class SecureFilter implements Filter {
-    
+    @EJB 
+    private RoleFacade roleFacade;
+    @EJB
+    private UserRolesFacade userRolesFacade;
+    @EJB
+    private UserRolesFacade usersFacade;   
     private static final boolean debug = true;
 
     // The filter configuration object we are associated with.  If
@@ -43,21 +54,29 @@ public class SecureFilter implements Filter {
             FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest hsr = (HttpServletRequest)request;
+        String topRoleCurrentUsers = null;
         HttpSession session = hsr.getSession(false);
         if(session == null){
-            hsr.setAttribute("loginOn", false);
+            hsr.setAttribute("topRoleCurrentUsers", topRoleCurrentUsers);
                     chain.doFilter(request, response);
                     return;
 
         }
         Users users = (Users) session.getAttribute("users");
         if(users == null){
-            hsr.setAttribute("loginOn", false);
+            hsr.setAttribute("topRoleCurrentUsers", topRoleCurrentUsers);
                     chain.doFilter(request, response);
                     return;
 
         }
-        hsr.setAttribute("loginOn", true);
+        topRoleCurrentUsers = userRolesFacade.getTopRoleName(users);
+        if(topRoleCurrentUsers == null){
+            hsr.setAttribute("topRoleCurrentUsers", topRoleCurrentUsers);
+                    chain.doFilter(request, response);
+                    return;
+
+        }
+        request.setAttribute("topRoleCurrentUsers", topRoleCurrentUsers);
         chain.doFilter(request, response);
     }
 

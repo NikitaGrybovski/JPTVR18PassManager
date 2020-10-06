@@ -5,8 +5,11 @@
  */
 package session;
 
+import entity.Role;
 import entity.UserRoles;
 import entity.Users;
+import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,6 +21,8 @@ import javax.persistence.PersistenceContext;
 @Stateless
 public class UserRolesFacade extends AbstractFacade<UserRoles> {
 
+    @EJB
+    private RoleFacade roleFacade;
     @PersistenceContext(unitName = "JPTVR18PassManagerPU")
     private EntityManager em;
 
@@ -32,8 +37,8 @@ public class UserRolesFacade extends AbstractFacade<UserRoles> {
 
     public boolean checkRole(Users users, String roleName) {
         try {
-           em.createQuery("SELECT ur FROM UserRoles ur WHERE ur.role = :role AND ur.users = :users")
-                   .setParameter("role", roleName)
+           em.createQuery("SELECT ur FROM UserRoles ur WHERE ur.role.name = :roleName AND ur.users = :users")
+                   .setParameter("roleName", roleName)
                    .setParameter("users", users)
                    .getSingleResult();
                    return true;
@@ -41,5 +46,50 @@ public class UserRolesFacade extends AbstractFacade<UserRoles> {
             return false;
         }
     }
+
+    public String getTopRoleName(Users users) {
+        List<UserRoles> listUserRoles = em.createQuery("SELECT r FROM UserRoles r WHERE r.users = :users")
+                .setParameter("users",users)
+                .getResultList();
+        for (UserRoles userRoles : listUserRoles) {
+            if("ADMIN".equals(userRoles.getRole().getName())){
+                return "ADMIN";
+            }else if("USER".equals(userRoles.getRole().getName())){
+                return "USER";
+            }
+            
+        }
+        return null;
+    }
+
+    public void deleteAllUserRoles(Users updateUser) {
+        em.createQuery("DELETE FROM UserRoles ur WHERE ur.users = :updateUser")
+                .setParameter("updateUser", updateUser)
+                .executeUpdate();
+    }
+
+    public void setNewRoleToUser(String newRoleName, Users updateUser) {
+        if(newRoleName.equals("ADMIN")){
+            Role role = roleFacade.getRole(newRoleName);
+            UserRoles ur = new UserRoles();
+            ur.setUsers(updateUser);
+            ur.setRole(role);
+            this.create(ur);
+            role = roleFacade.getRole("USER");
+            ur.setRole(role);
+            this.create(ur);
+        }
+        if(newRoleName.equals("USER")){
+            Role role = roleFacade.getRole(newRoleName);
+            UserRoles ur = new UserRoles();
+            ur.setUsers(updateUser);
+            ur.setRole(role);
+            this.create(ur);
+            
+        }
+    }
+    
+    
+    
     
 }

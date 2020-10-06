@@ -41,11 +41,6 @@ import session.UsersResourcesFacade;
     "/deleteResource",
     "/showEditResource",
     "/updateResource",
-     "/showFormAddUsers",
-     "/createUsers",
-     "/showFormLogin",
-     "/login",
-     "/logout",
      "/showResource",
     
 
@@ -78,10 +73,10 @@ public class ResourceController extends HttpServlet {
         HttpSession session = request.getSession(false);
         
         
-        Users users = null;
-        users = (Users) session.getAttribute("users");
-        UserManager userManager = new UserManager();
-        if(userManager.isRole(users,"USER")){
+        
+        Users users = (Users) session.getAttribute("users");
+        //UserManager userManager = new UserManager();
+        if(!userRolesFacade.checkRole(users,"USER")){
             request.setAttribute("info", "У вас нет права");
             request.getRequestDispatcher("/showFormLogin").forward(request, response);
         }
@@ -89,27 +84,14 @@ public class ResourceController extends HttpServlet {
        
         switch (path) {
             case "/showFormAddResource":
-                
-            request.setAttribute("info", "Войдите в систему");
-            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-
-            
-                    request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
-                
-                
-                break;
+            request.getRequestDispatcher("/showFormAddResource.jsp").forward(request, response);
+            break;
             
             case "/createResource":
-                
-                request.setAttribute("info", "Войдите в систему");
-                request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-
-                
-                    String name = request.getParameter("name");
+                String name = request.getParameter("name");
                 String url = request.getParameter("url");
                 String login = request.getParameter("login");
                 String password = request.getParameter("password");
-                
                 Resource resource = new Resource(name, url, login, password);
                 
                 resourceFacade.create(resource);
@@ -120,18 +102,11 @@ public class ResourceController extends HttpServlet {
                 
                 request.setAttribute("info", "Ресурс создан : "+resource.getName()+" / "+resource.getUrl());
                 request.getRequestDispatcher("/index.jsp").forward(request, response);
-                
-                
                 break;
             case "/listResources":
-                
-            request.setAttribute("info", "Войдите в систему");
-            request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-
-           
-                    List<Resource> listResources = resourceFacade.findByUser(users);
-                request.setAttribute("listResources",listResources);
-                request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
+            List<Resource> listResources = resourceFacade.findByUser(users);
+            request.setAttribute("listResources",listResources);
+            request.getRequestDispatcher("/listResources.jsp") .forward(request, response);
                 
                 
                 
@@ -185,57 +160,7 @@ public class ResourceController extends HttpServlet {
                 request.setAttribute("resource", resource);
                 request.getRequestDispatcher("/pages/listResources.jsp").forward(request,response);
                 break;
-            case "/showFormAddUsers":
-                request.getRequestDispatcher("/showFormAddUsers.jsp").forward(request, response);
-                break;
-            case "/createUsers":
-                
-                String userlogin = request.getParameter("userlogin");
-                String userpassword = request.getParameter("userpassword");
-                MakeHash makeHash = new MakeHash();
-                String salts = makeHash.CreateSalts();
-                String encodingPassword = makeHash.createHash(userpassword, salts);
-                String phone = request.getParameter("phone");
-                String mail = request.getParameter("mail");
-                
-                
-                users = new Users(userlogin, encodingPassword,salts);
-                
-                usersFacade.create(users);
-                Role role = roleFacade.getRole("USER");
-                UserRoles userRoles = new UserRoles(users,role);
-                userRolesFacade.create(userRoles);
-                request.setAttribute("info", "Пользователь : "+users.getUserlogin()+"создан");
-                request.getRequestDispatcher("/index.jsp").forward(request, response);
-                break;
-            case "/showFormLogin":
-                request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-                break;
-            case "/login":
-                login = request.getParameter("login");
-                password = request.getParameter("password");
-                users = usersFacade.fingByLogin(login);
-                
-                MakeHash mh = new MakeHash();
-                String encriptPassword = mh.createHash(password,users.getSalts());
-                
-                if(!encriptPassword.equals(users.getUserpassword())){
-                    request.setAttribute("info", "Нет такого пользователя");
-                    request.getRequestDispatcher("/showFormLogin.jsp").forward(request, response);
-                }
-                session = request.getSession(true);
-                session.setAttribute("users", users);
-                request.setAttribute("info", "Привет, "+users.getUserlogin());
-                request.getRequestDispatcher("/index.jsp").forward(request, response);
-                break;
-            case "/logout":
-                session = request.getSession(false);
-                if(session != null){
-                    session.invalidate();
-                }
-                request.setAttribute("info", "Вы вышли из аккаунта");
-                request.getRequestDispatcher("/index.jsp").forward(request, response);
-                break;
+            
             
            
         }
