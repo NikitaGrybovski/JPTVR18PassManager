@@ -105,16 +105,23 @@ public class AdminController extends HttpServlet {
                 userId = request.getParameter("userId");
                 String userlogin = request.getParameter("userlogin");
                 String userpassword = request.getParameter("userpassword");
+                String currentRole = request.getParameter("currentRole");
                 String newRole = request.getParameter("newRole");
+                if(newRole.equals(currentRole)){
+                    request.setAttribute("info", "Роль не изменилась.");
+                    request.getRequestDispatcher("/admin/editUserRolesForm.jsp").forward(request, response);
+                    break;
+                }
+                Role newRoleUpdateUser = roleFacade.find(Long.parseLong(newRole));
                 if(userId == null){
                     request.setAttribute("info", "Не найден пользователь");
                     request.getRequestDispatcher("/admin/showListUsers.jsp").forward(request, response);
                 }
                 Users updateUser = usersFacade.find(Long.parseLong(userId));
                 userRolesFacade.deleteAllUserRoles(updateUser);
-                userRolesFacade.setNewRoleToUser(newRole,updateUser);
-                
+                userRolesFacade.setNewRoleToUser(newRoleUpdateUser, updateUser);
                 updateUser.setUserlogin(userlogin);
+                
                 if(userpassword != null){
                     MakeHash mh = new MakeHash();
                     String salts = mh.CreateSalts();

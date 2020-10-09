@@ -68,22 +68,21 @@ public class UserRolesFacade extends AbstractFacade<UserRoles> {
                 .executeUpdate();
     }
 
-    public void setNewRoleToUser(String newRoleName, Users updateUser) {
-        if(newRoleName.equals("ADMIN")){
-            Role role = roleFacade.getRole(newRoleName);
-            UserRoles ur = new UserRoles();
+    public void setNewRoleToUser(Role newRole, Users updateUser) {
+        UserRoles ur = new UserRoles();
+        if(newRole.getName().equals("ADMIN")){
             ur.setUsers(updateUser);
-            ur.setRole(role);
+            ur.setRole(newRole);
             this.create(ur);
-            role = roleFacade.getRole("USER");
-            ur.setRole(role);
+            Role role = roleFacade.getRole("USER");
+            ur = new UserRoles();
+            ur.setUsers(updateUser);
             this.create(ur);
+            
         }
-        if(newRoleName.equals("USER")){
-            Role role = roleFacade.getRole(newRoleName);
-            UserRoles ur = new UserRoles();
+        if(newRole.getName().equals("USER")){
             ur.setUsers(updateUser);
-            ur.setRole(role);
+            ur.setRole(newRole);
             this.create(ur);
             
         }

@@ -14,13 +14,13 @@
         <span class="heading">Изменить данные пользователя</span>
         <p>${info}</p>
         <div class="form-group">
-        <input value="${editUsers.id}" type="hidden" name="userId">
-        <input value="${editUsers.userlogin}" type="text" class="form-control" id="inputLogin" name="userlogin" placeholder="Логин: ">
+        <input value="${editUser.id}" type="hidden" name="userId">
+        <input value="${editUser.userlogin}" type="text" class="form-control" id="inputLogin" name="userlogin" placeholder="Логин: ">
         <i class="fa fa-user"></i>
         </div>
         
         <div class="form-group help">
-        <input value="" type="password" class="form-control" id="inputPassword" name="userpassword" placeholder="Password">
+        <input value="" type="password" class="form-control" id="inputPassword" name="userpassword" placeholder="Password" disabled>
         <i class="fa fa-lock"></i>
         </div>
         
@@ -31,16 +31,17 @@
         
         <div class="form-group">
         <label for="newRole">Список ролей</label>
+        <select id="inputState" class="form-control" name="newRole" id="newRole">
         <c:forEach var="role" items="${listRoles}">
-            <select id="inputState" class="form-control" name="newRole" id="newRole">
+            
                 <c:if test="${role.name eq topRoleEditUser}">
                  <option value="${role.id}" selected>${role.name}</option>   
                 </c:if>
                  <c:if test="${role.name ne topRoleEditUser}">
                  <option value="${role.id}">${role.name}</option>   
                 </c:if>
-            </c:forEach>
-            </select>
+        </c:forEach>
+        </select>
          
         </div>
         
