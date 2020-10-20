@@ -15,6 +15,7 @@ document.getElementById("addResource").onclick = function(e){
 document.getElementById("addUser").onclick = function(e){
     e.preventDefault()
    toogleMenuActive("addUser");
+   addUser();
 }
 document.getElementById("systemOut").onclick = function(e){
    e.preventDefault()
@@ -84,10 +85,74 @@ function addFormNewResource(){
  </div><!-- /.row -->
 </div><!-- /.container -->
 `;
-    document.getElementById("btnAddResource").onclick = function (){
+    document.getElementById("btnAddResource").addEventListener("click",function(e){
+        e.preventDefault();
         createResource();
-    }
+        
+    });
     function createResource(){
-        alert("funnction createResource() runing");
+        let name = document.getElementById("inputName").value;
+        let url = document.getElementById("inputUrl").value;
+        let login = document.getElementById("inputLogin").value;
+        let password = document.getElementById("inputPassword").value;
+        let data = {
+            "inputName":inputName,
+            "inputUrl":inputUrl,
+            "inputLogin":inputLogin,
+            "inputPassword":inputPassword,
+        };
+        fetch("createResourceJson",{"method":"POST",
+                                "headers":{'Content-Type':'application/json:charset=utf-8'},
+                                "body": JSON.stringify(data)
+                                    })
+                                    .then(response => {
+                                        if(response.status >= 200 & response.status < 300){
+                                            return Promise.resolve(response)
+                                        }})
+                                        .then(response => {
+                                           return response.json()
+                                           })
+                                                   .catch((ex)=> console.log("fetch Exception",ex))
+                                                   .then(function(response){
+                                                       if(response === null || response === undefined){
+                                                           document.getElementById("info").innerHTML=`
+                                                           Не получены данные с сервера
+                                                            `;
+                                                       }else{
+                                                           document.getElementById("info").innerHTML=`
+                                                           Ресурс`+response.data.inputName+ `добавлен`;
+                                                       }
+                                                   });
     }
+}
+
+function addUser(){
+    document.getElementById("contentPage").innerHTML=`
+    <div class="container">
+        <div class="row">
+       <div class="col-md-3"></div>
+        <div class="col-md-offset-3 col-md-6">
+           <form class="form-horizontal" action="createUsers" method="post">
+               <span class="heading">Регистрация</span>
+               <p>${info}</p>
+               <div class="form-group">
+               <input type="text" class="form-control" id="inputLogin" name="userlogin" placeholder="Логин: ">
+               <i class="fa fa-user"></i>
+               </div>
+               <div class="form-group help">
+               <input type="password" class="form-control" id="inputPassword" name="userpassword" placeholder="Password">
+               <i class="fa fa-lock"></i>
+
+               </div>
+               <div class="form-group">
+
+               <button type="submit" class="btn btn-default">Зарегистрироваться</button>
+               </div>
+           </form>
+        </div>
+
+    </div><!-- /.row -->
+    </div><!-- /.container -->
+`;
+    
 }
