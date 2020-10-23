@@ -6,6 +6,7 @@
 package Json.Builders;
 
 import entity.Resource;
+import entity.Users;
 import java.math.BigDecimal;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -23,6 +24,13 @@ public class ResourceJsonBuilder {
                 .add("url", resource.getUrl())
                 .add("login", resource.getLogin())
                 .add("password", resource.getPassword());
+         return job.build();
+    }
+    public JsonObject createJsonUser(Users users){
+        JsonObjectBuilder job = Json.createObjectBuilder();
+         job.add("id", users.getId())
+                .add("login", users.getUserlogin())
+                .add("password", users.getUserpassword());
          return job.build();
     }
 }

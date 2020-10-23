@@ -7,9 +7,11 @@ package Json.Servlets;
 
 import Json.Builders.ResourceJsonBuilder;
 import entity.Resource;
+import entity.Role;
+import entity.UserRoles;
+import entity.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import javax.ejb.EJB;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -21,18 +23,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import session.ResourceFacade;
+import session.RoleFacade;
+import session.UserRolesFacade;
+import session.UsersFacade;
+import util.MakeHash;
 
 /**
  *
  * @author pupil
  */
 @WebServlet(name = "JsonResourceController", urlPatterns = {
-    "/createResourceJson"
+    "/createResourceJson",
+    "/createUserJson"
 })
 public class JsonResourceController extends HttpServlet {
 
     @EJB
     ResourceFacade resourceFacade;
+    @EJB
+    UsersFacade usersFacade;
+    @EJB
+    UserRolesFacade userRolesFacade;
+    @EJB
+    RoleFacade roleFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -53,25 +66,48 @@ public class JsonResourceController extends HttpServlet {
         switch (path) {
             case "/createResourceJson":
                 JsonObject jsonObject = jsonReader.readObject();
-                String name = jsonObject.getString("inputName");
-                String url = jsonObject.getString("inputUrl");
-                String login = jsonObject.getString("inputLogin");
-                String password = jsonObject.getString("inputPassword");
-                if(name == null || name.isEmpty() || url == null || url.isEmpty() || login == null || login.isEmpty() || password == null || password.isEmpty()){
+                String inputName = jsonObject.getString("inputName");
+                String inputUrl = jsonObject.getString("inputUrl");
+                String inputLogin = jsonObject.getString("inputLogin");
+                String inputPassword = jsonObject.getString("inputPassword");
+                if(inputName == null || inputName.isEmpty() || inputUrl == null || inputUrl.isEmpty() || inputLogin == null || inputLogin.isEmpty() || inputPassword == null || inputPassword.isEmpty()){
                     job.add("info", "Заполните все поля");
                     json = job.build().toString();
                     break;
                 }
-                Resource resource = new Resource(name, url, login, password);
+                Resource resource = new Resource(inputName,inputUrl,inputLogin,inputPassword);
                 resourceFacade.create(resource);
                 job.add("info", "Ресурс Успешно добавлен");
                 ResourceJsonBuilder resourceJsonBuilder = new ResourceJsonBuilder();
-                job.add("data","");
+                job.add("data",resourceJsonBuilder.createJsonResource(resource));
+                json = job.build().toString();
+                break;
+            case "/createUserJson":
+                 jsonObject = jsonReader.readObject();
+                 inputLogin = jsonObject.getString("inputLogin");
+                 inputPassword = jsonObject.getString("inputPassword");
+                 if(inputLogin == null || inputLogin.isEmpty() || inputPassword == null || inputPassword.isEmpty()){
+                    job.add("info", "Заполните все поля");
+                    json = job.build().toString();
+                    break;
+                }
+                
+                MakeHash makeHash = new MakeHash();
+                String salts = makeHash.CreateSalts();
+                String encodingPassword = makeHash.createHash(inputPassword, salts);
+                Users users = new Users(inputLogin, encodingPassword, salts);
+                Role role = roleFacade.getRole("USER");
+                UserRoles userRoles = new UserRoles(users,role);
+                userRolesFacade.create(userRoles);
+                usersFacade.create(users);
+                job.add("info", "Пользователь Успешно добавлен");
+                resourceJsonBuilder = new ResourceJsonBuilder();
+                job.add("data",resourceJsonBuilder.createJsonUser(users));
                 json = job.build().toString();
                 break;
             
         }
-        if("".equals(json)){
+        if(!"".equals(json)){
             try(PrintWriter out = response.getWriter()){
                 out.println(json);
                 out.flush();
