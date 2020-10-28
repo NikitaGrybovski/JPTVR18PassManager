@@ -5,11 +5,7 @@
  */
 package Json.Servlets;
 
-import Json.Builders.ResourceJsonBuilder;
 import Json.Builders.UserJsonBuilder;
-import entity.Resource;
-import entity.Role;
-import entity.UserRoles;
 import entity.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +19,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import session.ResourceFacade;
 import session.RoleFacade;
 import session.UserRolesFacade;
@@ -33,20 +30,22 @@ import util.MakeHash;
  *
  * @author pupil
  */
-@WebServlet(name = "JsonResourceController", urlPatterns = {
-    "/createResourceJson",
-    "/createUserJson"
+@WebServlet(name = "JsonLoginController", urlPatterns = {
+    "/loginUserJson",
+    "/logoutUserJson"
+    
+    
 })
-public class JsonResourceController extends HttpServlet {
+public class JsonLoginController extends HttpServlet {
+@EJB
+ResourceFacade resourceFacade;
+@EJB
+UsersFacade usersFacade;
+@EJB
+UserRolesFacade userRolesFacade;
+@EJB
+RoleFacade roleFacade;
 
-    @EJB
-    ResourceFacade resourceFacade;
-    @EJB
-    UsersFacade usersFacade;
-    @EJB
-    UserRolesFacade userRolesFacade;
-    @EJB
-    RoleFacade roleFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -65,49 +64,47 @@ public class JsonResourceController extends HttpServlet {
         String json = "";
         String path = request.getServletPath();
         switch (path) {
-            case "/createResourceJson":
+            case "/loginUserJson":
                 JsonObject jsonObject = jsonReader.readObject();
-                String inputName = jsonObject.getString("inputName");
-                String inputUrl = jsonObject.getString("inputUrl");
-                String inputLogin = jsonObject.getString("inputLogin");
-                String inputPassword = jsonObject.getString("inputPassword");
-                if(inputName == null || inputName.isEmpty() || inputUrl == null || inputUrl.isEmpty() || inputLogin == null || inputLogin.isEmpty() || inputPassword == null || inputPassword.isEmpty()){
+                String login = jsonObject.getString("inputLogin");
+                String password = jsonObject.getString("inputPassword");
+                if(login == null || login.isEmpty()
+                       || password == null || password.isEmpty()
+                                ){
                     job.add("info", "Заполните все поля");
+                    json = job.build().toString();
+                    //json = "{\"info\":\"Заполните все поля\"}";
+                    break;
+                }
+                Users users = usersFacade.fingByLogin(login);
+                if(users == null){
+                    job.add("info", "Нет такого пользователя или неправильный пароль");
                     json = job.build().toString();
                     break;
                 }
-                Resource resource = new Resource(inputName,inputUrl,inputLogin,inputPassword);
-                resourceFacade.create(resource);
-                job.add("info", "Ресурс Успешно добавлен");
-                ResourceJsonBuilder resourceJsonBuilder = new ResourceJsonBuilder();
-                job.add("data",resourceJsonBuilder.createJsonResource(resource));
-                json = job.build().toString();
-                break;
-            case "/createUserJson":
-                 jsonObject = jsonReader.readObject();
-                 inputLogin = jsonObject.getString("inputLogin");
-                 inputPassword = jsonObject.getString("inputPassword");
-                 if(inputLogin == null || inputLogin.isEmpty() || inputPassword == null || inputPassword.isEmpty()){
-                    job.add("info", "Заполните все поля");
+                MakeHash mh = new MakeHash();
+                password = mh.createHash(password, users.getSalts());
+                if(!password.equals(users.getUserpassword())){
+                    job.add("info", "Нет такого пользователя или неправильный пароль");
                     json = job.build().toString();
                     break;
                 }
-                
-                MakeHash makeHash = new MakeHash();
-                String salts = makeHash.CreateSalts();
-                String encodingPassword = makeHash.createHash(inputPassword, salts);
-                Users users = new Users(inputLogin, encodingPassword, salts);
-                usersFacade.create(users);
-                Role role = roleFacade.getRole("USER");
-                UserRoles userRoles = new UserRoles(users,role);
-                userRolesFacade.create(userRoles);
-                
-                job.add("info", "Пользователь Успешно добавлен");
+                HttpSession httpSession = request.getSession(true);
+                httpSession.setAttribute("users", users);
+                String JSESSIONID = httpSession.getId();
+                String roleUser = userRolesFacade.getTopRoleName(users);
                 UserJsonBuilder ujb = new UserJsonBuilder();
-                job.add("data",ujb.createJsonUser(users));
+                job.add("data", ujb.createJsonUser(users, JSESSIONID, roleUser));
                 json = job.build().toString();
                 break;
-            
+            case "/logoutUserJson":
+                httpSession = request.getSession(false);
+                if(httpSession != null){
+                    httpSession.invalidate();
+                    job.add("info", "Вы вышли");
+                    json = job.build().toString();
+                }
+                break;
         }
         if(!"".equals(json)){
             try(PrintWriter out = response.getWriter()){
@@ -115,7 +112,9 @@ public class JsonResourceController extends HttpServlet {
                 out.flush();
             }
         }
+        
     }
+    
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**

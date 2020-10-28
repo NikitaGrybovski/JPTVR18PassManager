@@ -5,9 +5,7 @@
  */
 package Json.Builders;
 
-import entity.Resource;
 import entity.Users;
-import java.math.BigDecimal;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -16,15 +14,18 @@ import javax.json.JsonObjectBuilder;
  *
  * @author pupil
  */
-public class ResourceJsonBuilder {
-    public JsonObject createJsonResource(Resource resource){
+public class UserJsonBuilder {
+    public JsonObject createJsonUser(Users users,String JSESSIONID,String roleUsers){
         JsonObjectBuilder job = Json.createObjectBuilder();
-         job.add("id", resource.getId())
-                .add("name", resource.getName())
-                .add("url", resource.getUrl())
-                .add("login", resource.getLogin())
-                .add("password", resource.getPassword());
+         job.add("id", users.getId())
+                .add("login", users.getUserlogin())
+                .add("JSESSIONID",JSESSIONID)
+                .add("role",roleUsers);
+                
          return job.build();
+    }
+    public JsonObject createJsonUser(Users users){
+        return createJsonUser(users,null,null);
     }
     
 }

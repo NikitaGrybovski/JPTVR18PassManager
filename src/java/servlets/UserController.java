@@ -113,10 +113,7 @@ public class UserController extends HttpServlet {
                 String encodingPassword = makeHash.createHash(userpassword, salts);
                 String phone = request.getParameter("phone");
                 String mail = request.getParameter("mail");
-                
-                
                 users = new Users(userlogin, encodingPassword,salts);
-                
                 usersFacade.create(users);
                 Role role = roleFacade.getRole("USER");
                 UserRoles userRoles = new UserRoles(users,role);

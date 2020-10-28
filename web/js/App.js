@@ -4,10 +4,12 @@
 
 import {resourceModule} from './ResourceModule.js';
 import {userModule} from './UserModule.js';
+import {authModule} from './AuthModule.js';
 
 document.getElementById("systemIn").onclick = function(e){
     e.preventDefault()
    toogleMenuActive("systemIn");
+   authModule.showFormLogin();
    
 }
 document.getElementById("addResource").onclick = function(e){
@@ -35,6 +37,7 @@ document.getElementById("listUsers").onclick = function(e){
 document.getElementById("systemOut").onclick = function(e){
     e.preventDefault()
    toogleMenuActive("systemOut");
+   authModule.logout();
 }
 function toogleMenuActive(elementId){
     let activeElement = document.getElementById(elementId);
@@ -49,6 +52,7 @@ function toogleMenuActive(elementId){
         }
     }
 }
+authModule.authMenu();
 
 
 
