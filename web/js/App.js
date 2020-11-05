@@ -22,13 +22,11 @@ document.getElementById("addUser").onclick = function(e){
    toogleMenuActive("addUser");
    userModule.addFormNewUser()
 }
-document.getElementById("systemOut").onclick = function(e){
-   e.preventDefault()
-   toogleMenuActive("systemOut");
-}
+
 document.getElementById("listResources").onclick = function(e){
    e.preventDefault()
    toogleMenuActive("listResources");
+   resourceModule.showListResources();
 }
 document.getElementById("listUsers").onclick = function(e){
     e.preventDefault()

@@ -11,10 +11,15 @@ import entity.Resource;
 import entity.Role;
 import entity.UserRoles;
 import entity.Users;
+import entity.UsersResources;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
@@ -23,10 +28,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import session.ResourceFacade;
 import session.RoleFacade;
 import session.UserRolesFacade;
 import session.UsersFacade;
+import session.UsersResourcesFacade;
 import util.MakeHash;
 
 /**
@@ -35,7 +42,8 @@ import util.MakeHash;
  */
 @WebServlet(name = "JsonResourceController", urlPatterns = {
     "/createResourceJson",
-    "/createUserJson"
+    "/createUserJson",
+    "/getListResourcesJson"
 })
 public class JsonResourceController extends HttpServlet {
 
@@ -47,6 +55,8 @@ public class JsonResourceController extends HttpServlet {
     UserRolesFacade userRolesFacade;
     @EJB
     RoleFacade roleFacade;
+    @EJB
+    UsersResourcesFacade usersResourcesFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -62,6 +72,7 @@ public class JsonResourceController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         JsonReader jsonReader = Json.createReader(request.getReader());
         JsonObjectBuilder job = Json.createObjectBuilder();
+        JsonArrayBuilder jab = Json.createArrayBuilder();
         String json = "";
         String path = request.getServletPath();
         switch (path) {
@@ -78,6 +89,15 @@ public class JsonResourceController extends HttpServlet {
                 }
                 Resource resource = new Resource(inputName,inputUrl,inputLogin,inputPassword);
                 resourceFacade.create(resource);
+                UsersResources usersResources = new UsersResources();
+                usersResources.setResource(resource);
+                HttpSession session = request.getSession(false);
+                Users users = (Users) session.getAttribute("users");
+                usersResources.setUsers(users);
+                Calendar c = new GregorianCalendar();
+                usersResources.setDate(c.getTime());
+                usersResourcesFacade.create(usersResources);
+                
                 job.add("info", "Ресурс Успешно добавлен");
                 ResourceJsonBuilder resourceJsonBuilder = new ResourceJsonBuilder();
                 job.add("data",resourceJsonBuilder.createJsonResource(resource));
@@ -96,7 +116,7 @@ public class JsonResourceController extends HttpServlet {
                 MakeHash makeHash = new MakeHash();
                 String salts = makeHash.CreateSalts();
                 String encodingPassword = makeHash.createHash(inputPassword, salts);
-                Users users = new Users(inputLogin, encodingPassword, salts);
+                users = new Users(inputLogin, encodingPassword, salts);
                 usersFacade.create(users);
                 Role role = roleFacade.getRole("USER");
                 UserRoles userRoles = new UserRoles(users,role);
@@ -106,6 +126,40 @@ public class JsonResourceController extends HttpServlet {
                 UserJsonBuilder ujb = new UserJsonBuilder();
                 job.add("data",ujb.createJsonUser(users));
                 json = job.build().toString();
+                break;
+            case "/getListResourcesJson":
+                jsonObject = jsonReader.readObject();
+                int id = jsonObject.getInt("id");
+                String JSESSIONID = jsonObject.getString("JSESSIONID");
+                session = request.getSession(false);
+                if(!JSESSIONID.equals(session.getId())){
+                    job.add("info", "Вам следует залогиниться");
+                    json = job.build().toString();
+                    //json = "{\"info\":\"Заполните все поля\"}";
+                    break;
+                }
+                users = (Users) session.getAttribute("users");
+                if(users == null){
+                    job.add("info", "Вам следует залогиниться");
+                    json = job.build().toString();
+                    //json = "{\"info\":\"Заполните все поля\"}";
+                    break;
+                }
+                
+                if(id != users.getId()){
+                    job.add("info", "Вам следует залогиниться");
+                    json = job.build().toString();
+                    //json = "{\"info\":\"Заполните все поля\"}";
+                    break;
+                }
+                List<Resource> listResourcesForUser = resourceFacade.findByUser(users);
+                ResourceJsonBuilder rjb = new ResourceJsonBuilder();
+                
+                for (int i = 0; i < listResourcesForUser.size(); i++) {
+                    resource = listResourcesForUser.get(i);
+                    jab.add(rjb.createJsonResource(resource));
+                }
+                json = job.add("listResources", jab.build()).build().toString();
                 break;
             
         }
